@@ -1,3 +1,4 @@
 # MPPE
-Multi-modal Prompts with Primitives Enhancement for Compositional Zero-Shot Learning （MPPE）
-- **Title:Simple Primitives With Feasibility- and Contextuality-Dependence for Open-World Compositional Zero-Shot Learning(SAD-SP)**
+- **Title: Multi-modal Prompts with Primitives Enhancement for Compositional Zero-Shot Learning （MPPE）**
+- **Authors: Yutang Jin, Shiming Chen, Tianle Tong, Weiping Ding, Yisong Wang.**
+- **Institutes: Guizhou University, Huazhong University of Science and Technology, Nantong University.**
