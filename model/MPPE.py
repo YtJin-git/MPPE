@@ -146,7 +146,7 @@ class CrossAttentionLayer(nn.Module):
         return q
 
 
-class MyModel(nn.Module):
+class MPPE(nn.Module):
     def __init__(self, config, attributes, classes, offset):
         super().__init__()
         # self.clip = load_clip(name="E:\ZSLSampleProjects\GAN-CZSL\pretrained_clip\ViT-L-14.pt", context_length=config.context_length)
@@ -193,28 +193,6 @@ class MyModel(nn.Module):
         self.cam = nn.ModuleList([CrossAttentionLayer(output_dim, output_dim // 64, self.cross_attn_dropout) for _ in
                                   range(config.cmt_layers)])
         self.lamda = nn.Parameter(torch.ones(output_dim) * config.init_lamda)
-
-        # # CoOp
-        # ctx_dim = self.alpha_clip_model.ln_final.weight.shape[0]
-        # vis_dim = self.alpha_clip_model.visual.output_dim
-        # self.meta_net_c = nn.Sequential(OrderedDict([
-        #     ("linear1", nn.Linear(vis_dim, vis_dim // 16)),
-        #     ("relu", nn.ReLU(inplace=True)),
-        #     ("linear2", nn.Linear(vis_dim // 16, ctx_dim))
-        # ]))
-        # self.meta_net_c.half()
-        # self.meta_net_a = nn.Sequential(OrderedDict([
-        #     ("linear1", nn.Linear(vis_dim, vis_dim // 16)),
-        #     ("relu", nn.ReLU(inplace=True)),
-        #     ("linear2", nn.Linear(vis_dim // 16, ctx_dim))
-        # ]))
-        # self.meta_net_a.half()
-        # self.meta_net_o = nn.Sequential(OrderedDict([
-        #     ("linear1", nn.Linear(vis_dim, vis_dim // 16)),
-        #     ("relu", nn.ReLU(inplace=True)),
-        #     ("linear2", nn.Linear(vis_dim // 16, ctx_dim))
-        # ]))
-        # self.meta_net_o.half()
 
     def add_visual_tunable_params(self):
         adapter_num = 2 * self.alpha_clip_model.visual.transformer.layers
@@ -274,10 +252,6 @@ class MyModel(nn.Module):
         # token_ids indicates the position of [EOS]
         token_ids = self.tokenizer(self.config.prompt_template,
                                    context_length=self.config.context_length).cuda()
-        # token_ids_c = clip.tokenize("a photo of x x",
-        #                             context_length=self.config.context_length).cuda()
-        # token_ids = clip.tokenize(self.config.prompt_template,
-        #                            context_length=self.config.context_length).cuda()
 
         tokenized = torch.cat(
             [
@@ -389,10 +363,6 @@ class MyModel(nn.Module):
             token_tensor_batch_a = token_tensor[1].expand(bias_a.shape[0], -1, -1, -1).clone()
             token_tensor_batch_a[:, :, 1: len(self.attr_ctx_vectors) + 1, :] = ctx_shifted_a
             token_tensor[1] = token_tensor_batch_a.type(self.alpha_clip_model.dtype)
-            # token_tensor[1][
-            # :, 1: len(self.attr_ctx_vectors) + 1, :
-            # ] = self.attr_ctx_vectors.type(self.alpha_clip_model.dtype)
-
 
             # obj
             token_tensor[2][:, eos_idx[2] - 1, :] = soft_att_obj[
@@ -408,11 +378,6 @@ class MyModel(nn.Module):
             token_tensor_batch_o = token_tensor[2].expand(bias_o.shape[0], -1, -1, -1).clone()
             token_tensor_batch_o[:, :, 1: len(self.obj_ctx_vectors) + 1, :] = ctx_shifted_o
             token_tensor[2] = token_tensor_batch_o.type(self.alpha_clip_model.dtype)
-            # token_tensor[2][
-            # :, 1: len(self.obj_ctx_vectors) + 1, :
-            # ] = self.obj_ctx_vectors.type(self.alpha_clip_model.dtype)
-
-
         return token_tensor
 
     def loss_calu(self, predict, target):
@@ -618,16 +583,6 @@ class MyModel(nn.Module):
                     normalized_img_features[0],
                     text_features_c_a2o * self.alpha_clip_model.logit_scale.exp()
                 ))
-            # logits.append(torch.zeros(b, len(text_features_c_o2a)).cuda())
-
-            # text_features_c_o2a = torch.stack(text_features_c_o2a).type(self.dtype)
-            # text_features_c_o2a = text_features_c_o2a / text_features_c_o2a.norm(dim=-1, keepdim=True)
-            # logits.append(
-            #     torch.einsum(
-            #         "bd, kd->bk",
-            #         normalized_img_features[0],
-            #         text_features_c_o2a * self.alpha_clip_model.logit_scale.exp()
-            #     ))
             logits.append(torch.zeros(b, idx.shape[0]).cuda())
 
         else:   # bias is not None
@@ -657,5 +612,5 @@ class MyModel(nn.Module):
                 ))
             logits.append(torch.zeros(b, idx.shape[0]).cuda())
 
-        # return logits
-        return normalized_img_features[0], text_features_c_a2o
+        return logits
+
