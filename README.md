@@ -55,7 +55,10 @@ t-SNE visualization on (a) MIT-States and (b) UT-Zappos, including seen and unse
 to get binary masks.
 
 ### Training
-
+To train MPPE, the command is:
+```
+    python train.py --yml_path config/mppe/mit-states.yml --dataset_path datasets/mit-states --clip_arch pretrained_clip/ViT-L-14.pt --alpha_vision_ckpt_pth pretrained_alphaclip/clip_l14_grit20m_fultune_2xe.pth --save_path logs
+```
 
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
