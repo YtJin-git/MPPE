@@ -44,7 +44,7 @@ t-SNE visualization on (a) MIT-States and (b) UT-Zappos, including seen and unse
     conda env create --file environment.yml
     conda activate czsl
 ```
-3. Go to the cloned repo (download_data) and open a terminal. Download the datasets:
+3. Go to the cloned repo (/download_data) and open a terminal. Download the datasets:
 ```
     sh download_data.sh
 ```
