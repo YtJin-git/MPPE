@@ -36,6 +36,27 @@ Qualitative results of different architecture of our method. We evaluate top-1 p
 
 t-SNE visualization on (a) MIT-States and (b) UT-Zappos, including seen and unseen compositions. For this analysis, we selected four models: CLIP, MPPE without the Alpha branch (MPPE w/o Alpha), MPPE without the primitives enhancement module (MPPE w/o PE), and the full MPPE model. On the test sets of MIT-States and UT-Zappos, we randomly selected ten seen compositions and ten unseen compositions for visualization. In this figure, circular dots represent the visual features of image samples, while triangular markers denote text features of corresponding labels. Samples of the same composition class are indicated by identical colors.
 
+## Usage
+### Setup 
+1. Clone the repo 
+2. We recommend using Anaconda for environment setup. To create the environment and activate it, please run:
+```
+    conda env create --file environment.yml
+    conda activate czsl
+```
+3. Go to the cloned repo (download_data) and open a terminal. Download the datasets:
+```
+    sh download_data.sh
+```
+4. Download SAM model from [segment-anything](https://github.com/facebookresearch/segment-anything), and run:
+```
+    python generate_mask_code/seg_czsl.py
+```
+to get binary masks.
+
+### Training
+
+
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
 
