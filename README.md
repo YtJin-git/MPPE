@@ -22,6 +22,14 @@ The results in CW-CZSL and OW-CZSL settings. More implementation details are ill
   <img src="images/Table4.png" />
 </p>
 
+### Qualitative Results
+<p align="center">
+  <img src="images/Fig5.png" />
+</p>
+
+Qualitative results of different architecture of our method. We evaluate top-1 predictions for some cases on the MIT-States and UT-Zappos. GT means ground truth labels, PE is the primitives enhancement module and Alpha denotes the visual prompt branch of our MPPE. \textcolor{green}{Green} and \textcolor{red}{red} denotes successful and unsuccessful predictions,
+  respectively.
+  
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
 
