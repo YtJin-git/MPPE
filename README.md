@@ -27,7 +27,7 @@ The results in CW-CZSL and OW-CZSL settings. More implementation details are ill
   <img src="images/Fig5.png" />
 </p>
 
-Qualitative results of different architecture of our method. We evaluate top-1 predictions for some cases on the MIT-States and UT-Zappos. GT means ground truth labels, PE is the primitives enhancement module and Alpha denotes the visual prompt branch of our MPPE. \textcolor{green}{Green} and \textcolor{red}{red} denotes successful and unsuccessful predictions,
+Qualitative results of different architecture of our method. We evaluate top-1 predictions for some cases on the MIT-States and UT-Zappos. GT means ground truth labels, PE is the primitives enhancement module and Alpha denotes the visual prompt branch of our MPPE. $\color{green}Green$ and $\color{red}red$ denotes successful and unsuccessful predictions,
   respectively.
   
 ## Acknowledgement
