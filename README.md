@@ -3,7 +3,7 @@
 - **Authors: Yutang Jin, Shiming Chen, Tianle Tong, Weiping Ding, Yisong Wang.**
 - **Institutes: Guizhou University, Huazhong University of Science and Technology, Nantong University.**
 
-This paper is currently under review at TCSVT. Once accepted, we will release the model code and weights, and further improve this open-source project.
+This paper is accepted by TCSVT. The early access version: [PDF](https://ieeexplore.ieee.org/document/11027124)
 
 ## Overview
 <p align="center">
