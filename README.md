@@ -1,3 +1,5 @@
+
+
 # MPPE
 - **Title: Multi-modal Prompts with Primitives Enhancement for Compositional Zero-Shot Learning （MPPE）**
 - **Authors: Yutang Jin, Shiming Chen, Tianle Tong, Weiping Ding, Yisong Wang.**
@@ -46,7 +48,7 @@ t-SNE visualization on (a) MIT-States and (b) UT-Zappos, including seen and unse
 ```
 3. Go to the cloned repo (/download_data) and open a terminal. Download the datasets:
 ```
-    sh download_data.sh
+    sh download_data/download_data.sh
 ```
 4. Download SAM model from [segment-anything](https://github.com/facebookresearch/segment-anything), and run:
 ```
@@ -62,4 +64,3 @@ To train MPPE, the command is:
 
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
-
