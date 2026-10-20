@@ -154,6 +154,14 @@ class MPPE(nn.Module):
                                                        alpha_vision_ckpt_pth=config.alpha_vision_ckpt_pth,
                                                        context_length=config.context_length)
         self.tokenizer = SimpleTokenizer()
+        # Published YAML files name the cross-attention branch "pe".
+        # Retain compatibility with older configs using "cam".
+        for direction in ("a2o", "o2a"):
+            for kind in ("loss", "inference"):
+                cam = f"pair_cam_{direction}_{kind}_weight"
+                pe = f"pair_pe_{direction}_{kind}_weight"
+                if not hasattr(config, cam) and hasattr(config, pe):
+                    setattr(config, cam, getattr(config, pe))
         self.config = config
         self.attributes = attributes
         self.classes = classes

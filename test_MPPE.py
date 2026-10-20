@@ -4,7 +4,7 @@ import os
 import pickle
 import pprint
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
@@ -25,124 +25,6 @@ cudnn.benchmark = True
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# def train_model(model, optimizer, config, train_dataset, val_dataset, test_dataset):
-#     train_dataloader = DataLoader(
-#         train_dataset,
-#         batch_size=config.train_batch_size,
-#         shuffle=True,
-#         num_workers=config.num_workers
-#     )
-#
-#     model.train()
-#     best_val_metric = 0
-#     best_test_metric = 0
-#     best_val_loss = 1e5
-#     best_test_loss = 1e5
-#     best_epoch = 0
-#     final_model_state = None
-#
-#     val_results = []
-#     test_results = []
-#
-#     scheduler = get_scheduler(optimizer, config, len(train_dataloader))
-#     attr2idx = train_dataset.attr2idx
-#     obj2idx = train_dataset.obj2idx
-#
-#     train_pairs = torch.tensor([(attr2idx[attr], obj2idx[obj])
-#                                 for attr, obj in train_dataset.train_pairs]).cuda()
-#
-#     train_losses = []
-#
-#     for i in range(config.epoch_start, config.epochs):
-#         progress_bar = tqdm.tqdm(
-#             total=len(train_dataloader), desc="epoch % 3d" % (i + 1)
-#         )
-#
-#         epoch_train_losses = []
-#         for bid, batch in enumerate(train_dataloader):
-#             predict = model(batch, train_pairs)
-#
-#             loss = model.loss_calu(predict, batch)
-#
-#             # normalize loss to account for batch accumulation
-#             loss = loss / config.gradient_accumulation_steps
-#
-#             # backward pass
-#             loss.backward()
-#
-#             # weights update
-#             if ((bid + 1) % config.gradient_accumulation_steps == 0) or (bid + 1 == len(train_dataloader)):
-#                 optimizer.step()
-#                 optimizer.zero_grad()
-#             scheduler = step_scheduler(scheduler, config, bid, len(train_dataloader))
-#
-#             epoch_train_losses.append(loss.item())
-#             progress_bar.set_postfix({"train loss": np.mean(epoch_train_losses[-50:])})
-#             progress_bar.update()
-#             # break
-#
-#         progress_bar.close()
-#         progress_bar.write(f"epoch {i + 1} "
-#                            f"train loss {np.mean(epoch_train_losses)}")
-#         train_losses.append(np.mean(epoch_train_losses))
-#
-#         # wandb.log({"train_loss": np.mean(epoch_train_losses)})
-#
-#         if (i + 1) % config.save_every_n == 0:
-#             torch.save(model.state_dict(), os.path.join(config.save_path, f"epoch_{i}.pt"))
-#
-#         print("Evaluating val dataset:")
-#         val_result = evaluate(model, val_dataset, config)
-#         val_results.append(val_result)
-#
-#         if config.val_metric == 'best_loss' and val_result['loss'] < best_val_loss:
-#             best_val_loss = val_result['loss']
-#             best_epoch = i
-#             torch.save(model.state_dict(), os.path.join(
-#                 config.save_path, "val_best.pt"))
-#         if config.val_metric != 'best_loss' and val_result[config.val_metric] > best_val_metric:
-#             best_val_metric = val_result[config.val_metric]
-#             best_epoch = i
-#             torch.save(model.state_dict(), os.path.join(
-#                 config.save_path, "val_best.pt"))
-#
-#         final_model_state = model.state_dict()
-#         if i + 1 == config.epochs:
-#             print("--- Evaluating test dataset on Closed World ---")
-#             model.load_state_dict(torch.load(os.path.join(
-#                 config.save_path, "val_best.pt"
-#             )))
-#             test_result = evaluate(model, test_dataset, config)
-#
-#     if config.save_final_model:
-#         torch.save(final_model_state, os.path.join(config.save_path, f'final_model.pt'))
-#
-#
-# def evaluate(model, dataset, config):
-#     model.eval()
-#     evaluator = test.Evaluator(dataset, model=None)
-#     all_logits, all_attr_gt, all_obj_gt, all_pair_gt, loss_avg = test.predict_logits(
-#         model, dataset, config)
-#     test_stats = test.test(
-#         dataset,
-#         evaluator,
-#         all_logits,
-#         all_attr_gt,
-#         all_obj_gt,
-#         all_pair_gt,
-#         config
-#     )
-#     test_saved_results = dict()
-#     result = ""
-#     key_set = ["best_seen", "best_unseen", "best_hm", "AUC", "attr_acc", "obj_acc"]
-#     for key in key_set:
-#         result = result + key + "  " + str(round(test_stats[key], 4)) + "| "
-#         test_saved_results[key] = round(test_stats[key], 4)
-#     print(result)
-#     test_saved_results['loss'] = loss_avg
-#     return test_saved_results
-
 
 def predict_logits(model, dataset, config):
     """Function to predict the cosine similarities between the
@@ -189,7 +71,7 @@ def predict_logits(model, dataset, config):
             logits = model.logit_infer(predict, pairs)
             loss += model.loss_calu(predict, data).item()
             # attr_truth, obj_truth, pair_truth = data[2], data[3], data[4]
-            attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+            attr_truth, obj_truth, pair_truth = data[2], data[3], data[4]
             logits = logits.cpu()
             all_logits = torch.cat([all_logits, logits], dim=0)
             all_attr_gt.append(attr_truth)
@@ -244,20 +126,18 @@ def predict_logits_text_first(model, dataset, config):
     all_logits = torch.Tensor()
     loss = 0
     with torch.no_grad():
-        text_feats = [[], [], []]
-        num_text_batch = pairs.shape[0] // config.text_encoder_batch_size
-        for i_text_batch in range(num_text_batch):
-            cur_pair = pairs[i_text_batch*config.text_encoder_batch_size:(i_text_batch+1)*config.text_encoder_batch_size, :]
-            cur_text_feats = model.encode_text_for_open(cur_pair)
-            for i_item in range(len(text_feats)):
-                text_feats[i_item].append(cur_text_feats[i_item])
-        if pairs.shape[0] % config.text_encoder_batch_size != 0:
-            cur_pair = pairs[num_text_batch*config.text_encoder_batch_size:, :]
-            cur_text_feats = model.encode_text_for_open(cur_pair)
-            for i_item in range(len(text_feats)):
-                text_feats[i_item].append(cur_text_feats[i_item])
-        for i_item in range(len(text_feats)):
-            text_feats[i_item] = torch.cat(text_feats[i_item], dim=0)
+        # Composition and PE features depend on each candidate pair.
+        # Attribute/object features cover the full vocabulary in every chunk.
+        text_feats = [[], None, None, []]
+        for start in range(0, len(pairs), config.text_encoder_batch_size):
+            cur_pair = pairs[start:start + config.text_encoder_batch_size]
+            features = model.encode_text_for_open(cur_pair)
+            text_feats[0].append(features[0])
+            text_feats[3].append(features[3])
+            if text_feats[1] is None:
+                text_feats[1], text_feats[2] = features[1], features[2]
+        text_feats[0] = torch.cat(text_feats[0], dim=0)
+        text_feats[3] = torch.cat(text_feats[3], dim=0)
         for idx, data in tqdm(
             enumerate(dataloader), total=len(dataloader), desc="Testing"
         ):
@@ -266,7 +146,7 @@ def predict_logits_text_first(model, dataset, config):
             logits = model.logit_infer(predict, pairs)
             loss += model.loss_calu(predict, data).item()
             # attr_truth, obj_truth, pair_truth = data[2], data[3], data[4]
-            attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+            attr_truth, obj_truth, pair_truth = data[2], data[3], data[4]
             logits = logits.cpu()
             all_logits = torch.cat([all_logits, logits], dim=0)
             all_attr_gt.append(attr_truth)
@@ -291,6 +171,14 @@ if __name__ == "__main__":
     config = parser.parse_args()
     if config.yml_path:
         load_args(config.yml_path, config)
+    # Explicit CLI options override YAML; unspecified options retain YAML values.
+    config = parser.parse_args(namespace=config)
+    if not config.load_model:
+        parser.error("--load_model is required (e.g. logs/val_best.pt)")
+    if not os.path.isfile(config.load_model):
+        parser.error(f"Checkpoint not found: {config.load_model}")
+    if config.text_encoder_batch_size <= 0 or config.threshold_trials <= 0:
+        parser.error("text_encoder_batch_size and threshold_trials must be positive")
     print(config)
     # set the seed value
     set_seed(config.seed)
@@ -315,9 +203,7 @@ if __name__ == "__main__":
     offset = len(attributes)
 
     model = get_model(config, attributes=attributes, classes=classes, offset=offset).cuda()
-    model.load_state_dict(torch.load(os.path.join(
-        "logs_cgqa_ow", "epoch_0.pt"
-    )))
+    model.load_state_dict(torch.load(config.load_model, map_location="cpu"), strict=True)
 
     predict_logits_func = predict_logits
     # ? can be deleted if not needed
@@ -340,7 +226,7 @@ if __name__ == "__main__":
             min_feasibility,
             max_feasibility,
             num=config.threshold_trials)
-        best_auc = 0.
+        best_auc = -float("inf")
         best_th = -10
         val_stats = None
         with torch.no_grad():
@@ -368,11 +254,12 @@ if __name__ == "__main__":
     else:
         best_th = config.threshold
         evaluator = Evaluator(val_dataset, model=None)
-        feasibility_path = os.path.join(
-            DIR_PATH, f'data/feasibility_{config.dataset}.pt')
-        unseen_scores = torch.load(
-            feasibility_path,
-            map_location='cpu')['feasibility']
+        if config.open_world:
+            feasibility_path = os.path.join(
+                DIR_PATH, f'data/feasibility_{config.dataset}.pt')
+            unseen_scores = torch.load(
+                feasibility_path,
+                map_location='cpu')['feasibility']
         with torch.no_grad():
             all_logits, all_attr_gt, all_obj_gt, all_pair_gt, loss_avg = predict_logits_func(
                 model, val_dataset, config)

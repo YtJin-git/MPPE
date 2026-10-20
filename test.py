@@ -412,7 +412,7 @@ def predict_logits(model, dataset, config):
             predict = model(data, pairs)
             logits = model.logit_infer(predict, pairs)
             loss += model.loss_calu(predict, data).item()
-            attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+            attr_truth, obj_truth, pair_truth = data[-3], data[-2], data[-1]
             logits = logits.cpu()
             all_logits = torch.cat([all_logits, logits], dim=0)
             all_attr_gt.append(attr_truth)
@@ -486,7 +486,7 @@ def predict_logits_text_first(model, dataset, config):
             predict = model.forward_for_open(data, text_feats)
             logits = model.logit_infer(predict, pairs)
             loss += model.loss_calu(predict, data).item()
-            attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+            attr_truth, obj_truth, pair_truth = data[-3], data[-2], data[-1]
             logits = logits.cpu()
             all_logits = torch.cat([all_logits, logits], dim=0)
             all_attr_gt.append(attr_truth)

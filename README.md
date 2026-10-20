@@ -60,6 +60,60 @@ To train MPPE, the command is:
     python train.py --yml_path config/mppe/mit-states.yml --dataset_path datasets/mit-states --clip_arch pretrained_clip/ViT-L-14.pt --alpha_vision_ckpt_pth pretrained_alphaclip/clip_l14_grit20m_fultune_2xe.pth --save_path logs
 ```
 
+### Testing a trained checkpoint
+
+Use `test_MPPE.py` for MPPE: it uses the same `CompositionMaskDataset`
+and five-element image/mask/label batches as training. Run from the repository root:
+
+```bash
+python test_MPPE.py \
+  --yml_path config/mppe/mit-states.yml \
+  --dataset_path datasets/mit-states \
+  --clip_arch pretrained_clip/ViT-L-14.pt \
+  --alpha_vision_ckpt_pth pretrained_alphaclip/clip_l14_grit20m_fultune_2xe.pth \
+  --load_model logs/val_best.pt \
+  --open_world false
+```
+
+- Replace `logs` with the `--save_path` used for training.
+  `val_best.pt` is a plain model state dictionary selected using the YAML
+  `val_metric` (AUC for the supplied MIT-States config; loss for UT-Zappos/C-GQA).
+  Periodic `epoch_<i>.pt` checkpoints use zero-based epoch indices.
+- Use the same model architecture, prompt settings, dataset split and inference
+  weights as training. For UT-Zappos or C-GQA, use the corresponding
+  `config/mppe/ut-zappos.yml` or `config/mppe/cgqa.yml`, dataset root and
+  checkpoint. Strict loading rejects incompatible state dictionaries.
+- Both pretrained weight paths remain necessary because the model constructor
+  initializes CLIP/AlphaCLIP before loading the trained state dictionary.
+  Prepare the dataset metadata, split files, `images/` and matching `masks/`
+  as in training. The current loader reads mask files for all three datasets,
+  including those for which it subsequently substitutes a zero mask.
+- The implementation requires CUDA and the project dependencies. Adjust
+  `--eval_batch_size` and `--text_encoder_batch_size` for available GPU memory.
+  Explicit CLI options override YAML options in `test_MPPE.py`.
+
+For open-world evaluation, change the last option to `--open_world true`.
+This requires `data/feasibility_<dataset>.pt`, aligned with the full
+attribute–object Cartesian product used by the dataset. With no `--threshold`,
+the script searches `--threshold_trials` thresholds (default 50) on validation
+AUC, then reuses the chosen threshold on the test set. To reuse an already
+chosen threshold, pass `--threshold <value>`. Closed-world evaluation does not
+require feasibility scores.
+
+The script evaluates validation and test splits and prints metrics including
+best seen/unseen accuracy, best harmonic mean and AUC. These are calibration
+sweep metrics, rather than accuracy at one fixed deployment bias.
+The legacy standalone `test.py` uses an unmasked dataset and should not be
+used as the MPPE testing entry point.
+
+**Validation status:** the evaluation fixes have passed Python syntax checks
+and dependency-free regression checks using synthetic batches and stub models
+(`python tests/test_mppe_evaluation.py`). These checks cover label indexing,
+text feature caching, CLI overrides and PE/CAM config compatibility; they do
+not run MPPE. Full checkpoint inference and benchmark metrics have not been
+verified in this environment because PyTorch/CUDA, datasets and trained
+weights are unavailable.
+
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
 

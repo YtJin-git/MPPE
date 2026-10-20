@@ -1,5 +1,15 @@
 import argparse
 
+def parse_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ("true", "1", "yes"):
+        return True
+    if value.lower() in ("false", "0", "no"):
+        return False
+    raise argparse.ArgumentTypeError("expected true or false")
+
+
 parser = argparse.ArgumentParser()
 
 
@@ -28,7 +38,7 @@ parser.add_argument("--seed", help="seed value", default=0, type=int)
 parser.add_argument("--gradient_accumulation_steps", help="number of gradient accumulation steps", default=1, type=int)
 parser.add_argument("--same_prim_sample", help="if sample same prim samples", action="store_true")
 
-parser.add_argument("--open_world", help="evaluate on open world setup", default=False)
+parser.add_argument("--open_world", help="evaluate on open world setup", type=parse_bool, nargs="?", const=True, default=False)
 parser.add_argument("--bias", help="eval bias", type=float, default=1e3)
 parser.add_argument("--topk", help="eval topk", type=int, default=1)
 parser.add_argument("--text_encoder_batch_size", help="batch size of the text encoder", default=16, type=int)
