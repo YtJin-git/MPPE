@@ -106,13 +106,6 @@ sweep metrics, rather than accuracy at one fixed deployment bias.
 The legacy standalone `test.py` uses an unmasked dataset and should not be
 used as the MPPE testing entry point.
 
-**Validation status:** the evaluation fixes have passed Python syntax checks
-and dependency-free regression checks using synthetic batches and stub models
-(`python tests/test_mppe_evaluation.py`). These checks cover label indexing,
-text feature caching, CLI overrides and PE/CAM config compatibility; they do
-not run MPPE. Full checkpoint inference and benchmark metrics have not been
-verified in this environment because PyTorch/CUDA, datasets and trained
-weights are unavailable.
 
 ## Acknowledgement
 This project mostly references [[Troika]](https://github.com/bighuang624/Troika) and [[DFSP]](https://github.com/Forest-art/DFSP), and I once again express my sincere gratitude to the authors of these two papers!
