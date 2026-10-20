@@ -3,7 +3,7 @@
 - **Authors: Yutang Jin, Shiming Chen, Tianle Tong, Weiping Ding, Yisong Wang.**
 - **Institutes: Guizhou University, Huazhong University of Science and Technology, Nantong University.**
 
-This paper is accepted by TCSVT. The early access version: [PDF](https://ieeexplore.ieee.org/document/11027124)
+This paper is accepted by TCSVT. The formal version: [PDF](https://ieeexplore.ieee.org/document/11027124)
 
 ## Overview
 <p align="center">
